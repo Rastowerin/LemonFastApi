@@ -2,12 +2,12 @@ import asyncio
 
 import httpx
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from parsing_script_config import URL_BASE, HEADERS, API_URL
 
 
-def get_token():
+def get_token() -> str:
     user_data = {
         "username": "admin",
         "password": "12345",
@@ -19,7 +19,7 @@ def get_token():
     return token
 
 
-async def get_id_and_author(url):
+async def get_id_and_author(url) -> tuple[str, str]:
     async with httpx.AsyncClient() as client:
         r = await client.get(URL_BASE + url, headers=HEADERS, follow_redirects=True)
     soup = BeautifulSoup(r.text, "html.parser")
@@ -32,7 +32,7 @@ async def get_id_and_author(url):
     return id, author
 
 
-async def get_item(item, position, token):
+async def get_item(item: Tag, position: int, token: str) -> None:
     title = item.find(class_="bulletinLink bull-item__self-link auto-shy").get_text()
     views = item.find(class_="views nano-eye-text").get_text()
     sub_url = item.find(class_="bulletinLink bull-item__self-link auto-shy").get("href")
@@ -54,7 +54,7 @@ async def get_item(item, position, token):
 
 def main():
 
-    url = URL_BASE + 'vladivostok/repository/construction/guard/+/Системы+видеонаблюдения'
+    url = URL_BASE + 'vladivostok/service/construction/guard/+/Системы+видеонаблюдения/'
     r = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(r.text, "html.parser")
 
@@ -62,10 +62,10 @@ def main():
     token = get_token()
 
     try:
-        for i in range(len(items)):
+        for i in range(10):
             item = items[i]
             asyncio.run(get_item(item, i + 1, token))
-    except AttributeError:
+    except (AttributeError, IndexError):
         print("Что то пошло не так!"
              f"\nпройите капчу по ссылке {url}"
               "\nлибо включите/выклчите впн")
