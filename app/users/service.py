@@ -18,7 +18,7 @@ class UserService:
     async def get(self, user_id: int) -> UserPublicSchema:
         try:
             return await self.repository.get(user_id)
-        except ValueError:
+        except KeyError:
             raise UserNotFoundException
 
     async def get_list(self) -> list[UserPublicSchema]:
@@ -27,23 +27,23 @@ class UserService:
     async def get_db_user_by_username(self, username: str) -> UserDBSchema:
         try:
             return await self.repository.get_db_user_by_username(username)
-        except ValueError:
+        except KeyError:
             raise UserNotFoundException
 
     async def create(self, user_create: UserCreateSchema) -> UserPublicSchema:
         try:
             return await self.repository.create(user_create)
-        except ValueError:
+        except KeyError:
             raise UserAlreadyExistsException
 
     async def update(self, user_id: int, user_update: UserCreateSchema) -> UserPublicSchema:
         try:
             return await self.repository.update(user_id, user_update)
-        except ValueError as e:
+        except KeyError as e:
             raise UserNotFoundException
 
     async def delete(self, user_id: int) -> None:
         try:
             return await self.repository.delete(user_id)
-        except ValueError:
+        except KeyError:
             raise UserNotFoundException
