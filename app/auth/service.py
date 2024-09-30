@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from app.auth.schemas import UserCredentialsSchema
 from app.config import SECRET_KEY, ALGORITHM
 from app.users.exceptions import UserNotFoundException, InvalidCredentialsException
-from app.users.repository import UserRepository
+from app.users.service import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -17,13 +17,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AuthService:
 
-    def __init__(self, user_repository: Annotated[UserRepository, Depends()]):
-        self.user_repository = user_repository
+    def __init__(self, user_service: Annotated[UserService, Depends()]):
+        self.user_service = user_service
 
     async def generate_token(self, credentials: UserCredentialsSchema) -> str:
 
         try:
-            user = await self.user_repository.get_by_username(credentials.username)
+            user = await self.user_service.get_by_username(credentials.username)
         except UserNotFoundException:
             raise InvalidCredentialsException
 

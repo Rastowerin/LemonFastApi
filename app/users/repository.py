@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_db
 from app.users.exceptions import UserNotFoundException, UserAlreadyExistsException
 from app.users.models import User
-from app.users.schemas import UserCreateSchema, UserDBSchema
+from app.users.schemas import UserCreateSchema, UserDBSchema, UserPublicSchema
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -17,22 +17,23 @@ class UserRepository:
     def __init__(self, session: AsyncSession = Depends(get_db)):
         self.session = session
 
-    async def get_list(self) -> list[User]:
+    async def get_list(self) -> list[UserPublicSchema]:
         result = await self.session.execute(
             select(User)
         )
 
-        return list(result.scalars().all())
+        users = list(map(UserPublicSchema.model_validate, result.scalars().all()))
+        return users
 
-    async def get(self, user_id: int) -> User:
+    async def get(self, user_id: int) -> UserPublicSchema:
         user = await self.session.get(User, user_id)
 
         if user is None:
             raise UserNotFoundException
 
-        return user
+        return UserPublicSchema.model_validate(user)
 
-    async def get_by_username(self, username: str) -> User:
+    async def get_by_username(self, username: str) -> UserPublicSchema:
         user = await self.session.execute(
             select(User).where(User.username == username)
         )
@@ -40,9 +41,9 @@ class UserRepository:
         if user is None:
             raise UserNotFoundException
 
-        return user.scalar()
+        return UserPublicSchema.model_validate(user.scalar())
 
-    async def create(self, user_create: UserCreateSchema) -> User:
+    async def create(self, user_create: UserCreateSchema) -> UserPublicSchema:
         hashed_password = pwd_context.hash(user_create.password)
         user = User(**user_create.model_dump(exclude='password'), hashed_password=hashed_password)
         try:
@@ -51,9 +52,9 @@ class UserRepository:
             await self.session.refresh(user)
         except IntegrityError:
             raise UserAlreadyExistsException
-        return user
+        return UserPublicSchema.model_validate(user)
 
-    async def update(self, user_id: int, user_update: UserCreateSchema) -> User:
+    async def update(self, user_id: int, user_update: UserCreateSchema) -> UserPublicSchema:
 
         check = await self.session.execute(
             select(User).where(User.id == user_id)
@@ -69,7 +70,7 @@ class UserRepository:
         )
         user = await self.session.get(User, user_id)
 
-        return user
+        return UserPublicSchema.model_validate(user)
 
     async def delete(self, user_id: int) -> None:
 
