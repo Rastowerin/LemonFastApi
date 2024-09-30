@@ -46,9 +46,6 @@ async def get_id_and_author(url) -> tuple[str, str]:
         r = await client.get(URL_BASE + url, headers=headers(), follow_redirects=True)
     soup = BeautifulSoup(r.text, "html.parser")
 
-    with open('file.html', 'w', encoding='utf-8') as file:
-        file.write(r.text)
-
     id = ''.join(char if char.isdigit() else '' for char in soup.find(class_="viewbull-bulletin-id__num").get_text())
     author = soup.find(class_="userNick auto-shy").get_text().replace('\n', '')
     return id, author
