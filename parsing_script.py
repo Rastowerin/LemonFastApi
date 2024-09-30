@@ -1,10 +1,32 @@
 import asyncio
+from time import sleep
 
 import httpx
 import requests
 from bs4 import BeautifulSoup, Tag
+from fake_useragent import UserAgent
 
-from parsing_script_config import URL_BASE, HEADERS, API_URL
+from parsing_script_config import URL_BASE, HEADERS, API_URL, LIMIT
+
+ua = UserAgent()
+
+
+def headers() -> dict[str, str]:
+    return {
+        **HEADERS,
+        'user-agent': ua.random
+    }
+
+
+def wait_for_api():
+    while True:
+        try:
+            requests.get(API_URL, '/items')
+        except requests.exceptions.ConnectionError:
+            sleep(1)
+            print('ждем апи...')
+        else:
+            break
 
 
 def get_token() -> str:
@@ -21,7 +43,7 @@ def get_token() -> str:
 
 async def get_id_and_author(url) -> tuple[str, str]:
     async with httpx.AsyncClient() as client:
-        r = await client.get(URL_BASE + url, headers=HEADERS, follow_redirects=True)
+        r = await client.get(URL_BASE + url, headers=headers(), follow_redirects=True)
     soup = BeautifulSoup(r.text, "html.parser")
 
     with open('file.html', 'w', encoding='utf-8') as file:
@@ -54,21 +76,25 @@ async def get_item(item: Tag, position: int, token: str) -> None:
 
 def main():
 
+    wait_for_api()
+
     url = URL_BASE + 'vladivostok/service/construction/guard/+/Системы+видеонаблюдения/'
-    r = requests.get(url, headers=HEADERS)
+    r = requests.get(url, headers=headers())
     soup = BeautifulSoup(r.text, "html.parser")
 
-    items = soup.find_all(class_="bull-list-item-js -exact", limit=10)
+    items = soup.find_all(class_="bull-list-item-js -exact", limit=LIMIT)
     token = get_token()
 
     try:
-        for i in range(10):
+
+        for i in range(LIMIT):
             item = items[i]
             asyncio.run(get_item(item, i + 1, token))
+
     except (AttributeError, IndexError):
-        print("Что то пошло не так!"
-             f"\nпройите капчу по ссылке {url}"
-              "\nлибо включите/выклчите впн")
+        print("Что-то пошло не так!"
+             f"\nПройите капчу по ссылке {url}"
+              "\nЛибо включите/выклчите впн")
     else:
         print("Готово!")
 

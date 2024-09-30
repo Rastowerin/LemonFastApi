@@ -28,7 +28,7 @@ class UserRepository:
         user = await self.session.get(User, user_id)
 
         if user is None:
-            raise ValueError("User not found")
+            raise KeyError("User not found")
 
         return UserPublicSchema.model_validate(user)
 
@@ -38,7 +38,7 @@ class UserRepository:
         )
 
         if user is None:
-            raise ValueError("User not found")
+            raise KeyError("User not found")
 
         return UserDBSchema.model_validate(user.scalar())
 
@@ -50,7 +50,7 @@ class UserRepository:
             await self.session.commit()
             await self.session.refresh(user)
         except IntegrityError:
-            raise ValueError("User already exists")
+            raise KeyError("User already exists")
         return UserPublicSchema.model_validate(user)
 
     async def update(self, user_id: int, user_update: UserCreateSchema) -> UserPublicSchema:
@@ -59,7 +59,7 @@ class UserRepository:
             select(User).where(User.id == user_id)
         )
         if not check.scalar():
-            raise ValueError("User not found")
+            raise KeyError("User not found")
 
         hashed_password = pwd_context.hash(user_update.password)
         user = UserDBSchema(**user_update.model_dump(exclude='password'), hashed_password=hashed_password)
@@ -78,7 +78,7 @@ class UserRepository:
         )
 
         if not check.scalar():
-            raise ValueError("User not found")
+            raise KeyError("User not found")
 
         await self.session.execute(
             delete(User).where(User.id == user_id)

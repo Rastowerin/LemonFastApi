@@ -16,7 +16,7 @@ class ItemRepository:
     async def get(self, item_id: int) -> ItemSchema:
         item = await self.session.get(Item, item_id)
         if item is None:
-            raise ValueError('Item not found')
+            raise KeyError('Item not found')
         return ItemSchema.model_validate(item)
 
     async def get_list(self) -> list[ItemSchema]:
@@ -34,7 +34,7 @@ class ItemRepository:
             await self.session.commit()
             await self.session.refresh(item)
         except IntegrityError:
-            raise ValueError("Item already exists")
+            raise KeyError("Item already exists")
         return ItemSchema.model_validate(item)
 
     async def update(self, item_id: int, item_schema: ItemSchema) -> ItemSchema:
@@ -44,7 +44,7 @@ class ItemRepository:
         )
 
         if not check.scalar():
-            raise ValueError("Item not found")
+            raise KeyError("Item not found")
 
         await self.session.execute(
             update(Item).where(Item.id == item_id).values(**item_schema.model_dump(exclude_unset=True))
@@ -58,7 +58,7 @@ class ItemRepository:
             select(Item).where(Item.id == item_id)
         )
         if not check.scalar():
-            raise ValueError("Item does not exist")
+            raise KeyError("Item does not exist")
 
         await self.session.execute(
             delete(Item).where(Item.id == item_id)

@@ -1,3 +1,4 @@
+LIMIT = 10
 
 URL_BASE = 'https://www.farpost.ru/'
 API_URL = 'http://127.0.0.1:8000'
@@ -10,7 +11,7 @@ HEADERS = {
     'cookie': 'ring=e76f0cfc02233a60c9a93107d54a2a0c; _ga=GA1.1.135039630.1727440395; repositorys_far_east_counter=1; side_map=disable; ring_session=1.1.1727440395.1727440395.1727441913.KBrtw%2FIQBMsuuWIZ37bHWD%2BimjijSaD3u9XJ2aI38HI%3D; _ga_G0RWKN84TQ=GS1.1.1727440394.1.1.1727441911.59.0.0',
     'dnt': '1',
     'priority': 'u=0, i',
-    'referer': 'https://www.farpost.ru/vladivostok/repository/construction/guard/+/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B+%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE%D0%BD%D0%B0%D0%B1%D0%BB%D1%8E%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F/',
+    'referer': 'https://duckduckgo.com',
     'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
     'sec-ch-ua-arch': '"x86"',
     'sec-ch-ua-bitness': '"64"',
@@ -24,5 +25,4 @@ HEADERS = {
     'sec-fetch-site': 'same-origin',
     'sec-fetch-user': '?1',
     'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
 }
