@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ItemSchema(BaseModel):
@@ -7,3 +7,5 @@ class ItemSchema(BaseModel):
     author: str
     title: str
     views: int
+
+    model_config = ConfigDict(from_attributes=True)

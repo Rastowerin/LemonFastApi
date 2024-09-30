@@ -14,21 +14,23 @@ class ItemRepository:
     def __init__(self, session: AsyncSession = Depends(get_db)):
         self.session = session
 
-    async def get(self, item_id: int) -> Item:
-        result = await self.session.get(Item, item_id)
+    async def get(self, item_id: int) -> ItemSchema:
+        item = await self.session.get(Item, item_id)
 
-        if result is None:
+        if item is None:
             raise ItemNotFoundException
 
-        return result
+        return ItemSchema.model_validate(item)
 
-    async def get_list(self) -> list[Item]:
+    async def get_list(self) -> list[ItemSchema]:
         result = await self.session.execute(
             select(Item)
         )
-        return list(result.scalars().all())
+        items = list(map(ItemSchema.model_validate, result.scalars().all()))
 
-    async def create(self, item_schema: ItemSchema) -> Item:
+        return items
+
+    async def create(self, item_schema: ItemSchema) -> ItemSchema:
 
         item = Item(**item_schema.model_dump())
         try:
@@ -37,9 +39,9 @@ class ItemRepository:
             await self.session.refresh(item)
         except IntegrityError:
             raise ItemAlreadyExistsException
-        return item
+        return ItemSchema.model_validate(item)
 
-    async def update(self, item_id: int, item_schema: ItemSchema) -> Item:
+    async def update(self, item_id: int, item_schema: ItemSchema) -> ItemSchema:
 
         check = await self.session.execute(
             select(Item).where(Item.id == item_id)
@@ -52,7 +54,7 @@ class ItemRepository:
             update(Item).where(Item.id == item_id).values(**item_schema.model_dump(exclude_unset=True))
         )
         item = Item(**item_schema.model_dump())
-        return item
+        return ItemSchema.model_validate(item)
 
     async def delete(self, item_id: int) -> None:
 
