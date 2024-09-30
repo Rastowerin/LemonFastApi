@@ -23,16 +23,16 @@ class AuthService:
     async def generate_token(self, credentials: UserCredentialsSchema) -> str:
 
         try:
-            user = await self.user_service.get_by_username(credentials.username)
+            user_schema = await self.user_service.get_db_user_by_username(credentials.username)
         except UserNotFoundException:
             raise InvalidCredentialsException
 
-        if not pwd_context.verify(hash=user.hashed_password, secret=credentials.password):
+        if not pwd_context.verify(hash=user_schema.hashed_password, secret=credentials.password):
             raise InvalidCredentialsException
 
         to_encode = {
-            "id": user.id,
-            "username": user.username,
+            "id": user_schema.id,
+            "username": user_schema.username,
         }
 
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

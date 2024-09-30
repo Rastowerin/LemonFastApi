@@ -32,7 +32,7 @@ class UserRepository:
 
         return UserPublicSchema.model_validate(user)
 
-    async def get_by_username(self, username: str) -> UserPublicSchema:
+    async def get_db_user_by_username(self, username: str) -> UserDBSchema:
         user = await self.session.execute(
             select(User).where(User.username == username)
         )
@@ -40,7 +40,7 @@ class UserRepository:
         if user is None:
             raise ValueError("User not found")
 
-        return UserPublicSchema.model_validate(user.scalar())
+        return UserDBSchema.model_validate(user.scalar())
 
     async def create(self, user_create: UserCreateSchema) -> UserPublicSchema:
         hashed_password = pwd_context.hash(user_create.password)

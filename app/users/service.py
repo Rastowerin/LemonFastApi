@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 
 from app.users.exceptions import UserNotFoundException, UserAlreadyExistsException
 from app.users.repository import UserRepository
-from app.users.schemas import UserCreateSchema, UserPublicSchema
+from app.users.schemas import UserCreateSchema, UserPublicSchema, UserDBSchema
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,9 +24,9 @@ class UserService:
     async def get_list(self) -> list[UserPublicSchema]:
         return await self.repository.get_list()
 
-    async def get_by_username(self, username: str) -> UserPublicSchema:
+    async def get_db_user_by_username(self, username: str) -> UserDBSchema:
         try:
-            return await self.repository.get_by_username(username)
+            return await self.repository.get_db_user_by_username(username)
         except ValueError:
             raise UserNotFoundException
 
