@@ -4,7 +4,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db
-from app.items.exceptions import ItemNotFoundException, ItemAlreadyExistsException
 from app.items.models import Item
 from app.items.schemas import ItemSchema
 
@@ -16,10 +15,8 @@ class ItemRepository:
 
     async def get(self, item_id: int) -> ItemSchema:
         item = await self.session.get(Item, item_id)
-
         if item is None:
-            raise ItemNotFoundException
-
+            raise ValueError('Item not found')
         return ItemSchema.model_validate(item)
 
     async def get_list(self) -> list[ItemSchema]:
@@ -27,7 +24,6 @@ class ItemRepository:
             select(Item)
         )
         items = list(map(ItemSchema.model_validate, result.scalars().all()))
-
         return items
 
     async def create(self, item_schema: ItemSchema) -> ItemSchema:
@@ -38,7 +34,7 @@ class ItemRepository:
             await self.session.commit()
             await self.session.refresh(item)
         except IntegrityError:
-            raise ItemAlreadyExistsException
+            raise ValueError("Item already exists")
         return ItemSchema.model_validate(item)
 
     async def update(self, item_id: int, item_schema: ItemSchema) -> ItemSchema:
@@ -48,7 +44,7 @@ class ItemRepository:
         )
 
         if not check.scalar():
-            raise ItemNotFoundException
+            raise ValueError("Item not found")
 
         await self.session.execute(
             update(Item).where(Item.id == item_id).values(**item_schema.model_dump(exclude_unset=True))
@@ -61,9 +57,8 @@ class ItemRepository:
         check = await self.session.execute(
             select(Item).where(Item.id == item_id)
         )
-
         if not check.scalar():
-            raise ItemNotFoundException
+            raise ValueError("Item does not exist")
 
         await self.session.execute(
             delete(Item).where(Item.id == item_id)
