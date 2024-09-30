@@ -39,7 +39,7 @@ class UserService:
     async def update(self, user_id: int, user_update: UserCreateSchema) -> UserPublicSchema:
         try:
             return await self.repository.update(user_id, user_update)
-        except ValueError:
+        except ValueError as e:
             raise UserNotFoundException
 
     async def delete(self, user_id: int) -> None:

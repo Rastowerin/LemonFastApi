@@ -65,7 +65,7 @@ class UserRepository:
         user = UserDBSchema(**user_update.model_dump(exclude='password'), hashed_password=hashed_password)
 
         await self.session.execute(
-            update(User).where(User.id == user_id).values(**user.model_dump())
+            update(User).where(User.id == user_id).values(**user.model_dump(exclude_unset=True))
         )
         user = await self.session.get(User, user_id)
 

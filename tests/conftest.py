@@ -23,17 +23,21 @@ def client():
             await session.commit()
             await session.close()
 
+    app.dependency_overrides[get_db] = override_get_db
+
+    return TestClient(app)
+
+
+@pytest.fixture(scope='module')
+def no_auth():
+
     async def override_get_current_user() -> User:
         return User(
             id=1,
             username='test',
-            hashed_password='<PASSWORD>',
+            hashed_password='123',
         )
-
-    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_user] = override_get_current_user
-
-    return TestClient(app)
 
 
 @pytest.fixture(scope='function')

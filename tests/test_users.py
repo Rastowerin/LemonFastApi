@@ -10,7 +10,7 @@ user_data2 = {
 }
 
 
-def test_create(client, reset_db):
+def test_create(client, reset_db, no_auth):
 
     response = client.post('/users', json=user_data1)
     assert response.status_code == 201
@@ -33,7 +33,7 @@ def test_create_duplicate(client, reset_db):
     assert response.status_code == 409
 
 
-def test_get(client, reset_db):
+def test_get(client, reset_db, no_auth):
 
     response = client.get('/users/1')
     assert response.status_code == 404
@@ -52,12 +52,12 @@ def test_get(client, reset_db):
     assert result == expected
 
 
-def test_get_not_found(client, reset_db):
+def test_get_not_found(client, reset_db, no_auth):
     response = client.get('/users/1')
     assert response.status_code == 404
 
 
-def test_get_all(client, reset_db):
+def test_get_all(client, reset_db, no_auth):
 
     client.post('/users', json=user_data1)
     client.post('/users', json=user_data2)
@@ -68,7 +68,7 @@ def test_get_all(client, reset_db):
     assert len(result) == 2
 
 
-def test_update(client, reset_db):
+def test_update(client, reset_db, no_auth):
 
     response = client.post('/users', json=user_data1)
     id = response.json()['id']
@@ -84,12 +84,12 @@ def test_update(client, reset_db):
     assert result == expected
 
 
-def test_update_not_found(client, reset_db):
+def test_update_not_found(client, reset_db, no_auth):
     response = client.put('/users/1', json=user_data2)
     assert response.status_code == 404
 
 
-def test_delete(client, reset_db):
+def test_delete(client, reset_db, no_auth):
 
     response = client.delete('/users/1')
     assert response.status_code == 404
@@ -105,6 +105,6 @@ def test_delete(client, reset_db):
     assert result == expected
 
 
-def test_delete_not_found(client, reset_db):
+def test_delete_not_found(client, reset_db, no_auth):
     response = client.delete('/users/1')
     assert response.status_code == 404

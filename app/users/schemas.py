@@ -12,8 +12,8 @@ class UserCreateSchema(UserBaseSchema):
 
 
 class UserPublicSchema(UserBaseSchema):
-    id: int
+    id: int = None
 
 
-class UserDBSchema(UserBaseSchema):
+class UserDBSchema(UserPublicSchema):
     hashed_password: str
